@@ -53,6 +53,10 @@ public class Main {
          * [Hint: call the initiateSnapshot method ]
          */
 
+        Algorithm a = new Algorithm(processor1,processor2,processor3);
+        (new Thread(new Executor1(a))).start();
+        (new Thread(new Executor2(a))).start();
+        (new Thread(new Executor3(a))).start();
         processor1.initiateSnapShot();
 
     }

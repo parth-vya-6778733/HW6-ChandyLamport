@@ -16,6 +16,7 @@ import java.util.Observer;
 
 public class Processor implements Observer {
 
+    Map<Buffer,Thread> recorderThread;
     List<Buffer> inChannels = new ArrayList<>();
 
     /**
@@ -51,6 +52,12 @@ public class Processor implements Observer {
         //TODO: Homework make this processor as the observer for each of its inChannel
         //Hint [loop through each channel and add Observer (this) . Feel free to use java8 style streams if it makes
         // it look cleaner]
+        recorderThread = new HashMap<Buffer,Thread>();
+        channelMarkerCount = new HashMap<>();
+        channelState = new HashMap<>();
+        inChannels.stream().forEach(in -> {in.addObserver(this); channelMarkerCount.put(in,0);});
+        outChannels.stream().forEach(out -> channelMarkerCount.put(out,0));
+
 
     }
 
@@ -96,8 +103,15 @@ public class Processor implements Observer {
     public boolean isFirstMarker(Buffer fromChannel) {
         //TODO: Implemetent this method
         //[ Hint : Use the channelMarkerCount]
+        if(channelMarkerCount.get(fromChannel) < 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
 
-        return false;
     }
 
     /**
@@ -105,7 +119,7 @@ public class Processor implements Observer {
      * Processes the message received in the buffer
      */
     public void update(Observable observable, Object arg) {
-        Processor sender = (Processor) arg;
+
         Message message = (Message) arg;
         if (message.getMessageType().equals(MessageType.MARKER)) {
             Buffer fromChannel = (Buffer) observable;
@@ -118,41 +132,54 @@ public class Processor implements Observer {
                 // startrecording messages
                 //TODO: homework: Trigger the recorder thread from this processor so that it starts recording for each channel
                 // Exclude the "Channel from which marker has arrived.
+                Thread rThread = new RecorderThread(this, fromChannel);
+                recorderThread.put(fromChannel,rThread);
+                recorderThread.get(fromChannel).run();
 
             } else {
                 //Means it isDuplicateMarkerMessage.
                 //TODO: Homework Stop the recorder thread.
+                for(Buffer in : inChannels)
+                {
+
+                        recorderThread.get(in).interrupt();
+
+                }
+                for(Buffer out : outChannels)
+                {
+
+                    recorderThread.get(out).interrupt();
+
+                }
+
             }
             //TODO: Homework Send marker messages to each of the out channels
             // Hint: invoke  sendMessgeTo((Message) arg, outChannel) for each of the out channels
+            outChannels.stream().forEach(out -> sendMessgeTo(new Message(MessageType.MARKER),out));
 
         }
         else{
-            if (message.getMessageType().equals(MessageType.ALGORITHM)) {
-                System.out.println("Processing Algorithm message....");
+            if (!message.getMessageType().equals(MessageType.MARKER)) {
+                System.out.println("Processing " +  message.getMessageType().toString() + " message....");
             }  //There is no other type
         }
 
 
     }
 
-    public void initiateSnapShot() {
+    public void initiateSnapShot(){
         recordMyCurrentState();
         //TODO: Follow steps from Chandy Lamport algorithm. Send out a marker message on outgoing channel
         //[Hint: Use the sendMessgeTo method
-        for(Buffer outchannel : outChannels)
-        {
-            Message m = new Message(MessageType.MARKER);
-            sendMessgeTo(m,outchannel);
-        }
-
+        outChannels.stream().forEach(out -> sendMessgeTo(new Message(MessageType.MARKER),out));
         //TODO: homework Start recording on each of the input channels
 
-        for(Buffer inchannel : inChannels)
-        {
-            RecorderThread recorderThread = new RecorderThread(this,inchannel);
-            recorderThread.run();
-        }
+        inChannels.stream().forEach(in -> {Thread rThread = new RecorderThread(this, in);
+        recorderThread.put(in,rThread);
+        recorderThread.get(in).run();
+
+        });
+
     }
 
 

@@ -1,9 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecorderThread implements Runnable {
+public class RecorderThread extends Thread implements Runnable {
     Processor p;
     Buffer inChannel;
+
     @Override
     public void run() {
         try {
@@ -15,9 +16,18 @@ public class RecorderThread implements Runnable {
         }
     }
 
+    public RecorderThread(Processor p)
+    {
+        this.p = p;
+    }
+
     public RecorderThread(Processor p, Buffer inChannel)
     {
         this.p = p;
+        this.inChannel = inChannel;
+    }
+
+    public void setInChannel(Buffer inChannel) {
         this.inChannel = inChannel;
     }
 
@@ -52,11 +62,13 @@ public class RecorderThread implements Runnable {
         // ]
         while(true)
         {
-            if(!Thread.currentThread().isInterrupted())
+            if(!this.isInterrupted())
             {
-                if (!channel.getMessage(lastIdx + 1).equals(null))
+                if (lastIdx < channel.getTotalMessageCount()-1 && !channel.getMessage(lastIdx + 1).equals(null))
                 {
+                    System.out.println("Adding Message " + channel.getMessage(lastIdx+1).getMessageType().toString());
                     recordedMessagesSinceMarker.add(channel.getMessage(lastIdx++));
+                    Thread.sleep(1000);
                 }
             }
             else
@@ -66,6 +78,7 @@ public class RecorderThread implements Runnable {
                 {
                     System.out.println("Messages in this channel: " + m.getMessageType().toString());
                 }
+                break;
             }
         }
 

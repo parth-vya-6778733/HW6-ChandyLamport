@@ -8,7 +8,8 @@ public enum  MessageType {
 	 */
     COMPUTATION,
     //TODO: Add more message types SEND and RECIEVE
-
+	SEND,
+	RECEIVE,
 	ALGORITHM,
 
 	MARKER
