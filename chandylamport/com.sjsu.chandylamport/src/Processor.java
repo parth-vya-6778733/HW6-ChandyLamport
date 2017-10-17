@@ -142,6 +142,34 @@ public class Processor implements Observer {
                 //TODO: Homework Stop the recorder thread.
 
                 Thread.currentThread().interrupt();
+                recorderThread.get(fromChannel).interrupt();
+                recorderThread.get(fromChannel).run();
+
+                for(Buffer in : inChannels)
+                {
+                    try {
+                        recorderThread.get(in).sleep(3000);
+                        recorderThread.get(in).interrupt();
+                    }
+                    catch(InterruptedException e)
+                    {
+                        System.out.println("Duplicate Marker in while updating");
+                    }
+
+                }
+                for(Buffer out : outChannels)
+                {
+
+                    try {
+                        recorderThread.get(out).sleep(3000);
+                        recorderThread.get(out).interrupt();
+                    }
+                    catch(InterruptedException e)
+                    {
+                        System.out.println("Duplicate Marker in while updating");
+                    }
+
+                }
 
 
             }

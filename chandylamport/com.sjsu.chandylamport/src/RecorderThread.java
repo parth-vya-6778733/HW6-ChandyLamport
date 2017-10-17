@@ -8,12 +8,16 @@ public class RecorderThread extends Thread implements Runnable {
     @Override
     public void run() {
         try {
-            recordChannel(inChannel);
+            synchronized(p) {
+                recordChannel(inChannel);
+            }
+
         }
         catch(InterruptedException e)
         {
             System.out.println("Received Duplicate Marker");
         }
+
     }
 
     public RecorderThread(Processor p)
@@ -62,7 +66,7 @@ public class RecorderThread extends Thread implements Runnable {
         // ]
         while(true)
         {
-            if(!this.isInterrupted())
+            if(!Thread.currentThread().isInterrupted() && !Thread.currentThread().interrupted())
             {
                 if (lastIdx < channel.getTotalMessageCount()-1 && !channel.getMessage(lastIdx + 1).equals(null))
                 {
