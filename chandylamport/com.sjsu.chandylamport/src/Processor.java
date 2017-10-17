@@ -136,21 +136,13 @@ public class Processor implements Observer {
                 recorderThread.put(fromChannel,rThread);
                 recorderThread.get(fromChannel).run();
 
+
             } else {
                 //Means it isDuplicateMarkerMessage.
                 //TODO: Homework Stop the recorder thread.
-                for(Buffer in : inChannels)
-                {
 
-                        recorderThread.get(in).interrupt();
+                Thread.currentThread().interrupt();
 
-                }
-                for(Buffer out : outChannels)
-                {
-
-                    recorderThread.get(out).interrupt();
-
-                }
 
             }
             //TODO: Homework Send marker messages to each of the out channels
@@ -179,6 +171,18 @@ public class Processor implements Observer {
         recorderThread.get(in).run();
 
         });
+
+    }
+
+    public void printState()
+    {
+        for(List<Message> messageList : channelState.values())
+        {
+            for(Message m : messageList)
+            {
+                System.out.println("Messages in this Processor's State: " + m.getMessageType().toString());
+            }
+        }
 
     }
 

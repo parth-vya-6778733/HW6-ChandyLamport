@@ -68,17 +68,18 @@ public class RecorderThread extends Thread implements Runnable {
                 {
                     System.out.println("Adding Message " + channel.getMessage(lastIdx+1).getMessageType().toString());
                     recordedMessagesSinceMarker.add(channel.getMessage(lastIdx++));
-                    Thread.sleep(1000);
+                    //Thread.sleep(1000);
                 }
-            }
-            else
-            {
                 p.channelState.put(channel, recordedMessagesSinceMarker);
                 for(Message m : recordedMessagesSinceMarker)
                 {
                     System.out.println("Messages in this channel: " + m.getMessageType().toString());
                 }
-                break;
+            }
+            else
+            {
+                p.printState();
+                return;
             }
         }
 

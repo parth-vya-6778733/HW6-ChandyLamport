@@ -50,6 +50,7 @@ public class Algorithm {
 
 
         }
+        Thread.currentThread().interrupt();
     }
 
     // Write hard coded execution plan for processors
@@ -68,7 +69,7 @@ public class Algorithm {
 
         }
 
-
+        Thread.currentThread().interrupt();
 
     }
 
@@ -86,7 +87,7 @@ public class Algorithm {
             processor3.sendMessgeTo(new Message(MessageType.SEND), i);
         }
 
-
+        Thread.currentThread().interrupt();
     }
 
     /**
